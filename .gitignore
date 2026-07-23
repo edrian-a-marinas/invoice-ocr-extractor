@@ -221,6 +221,10 @@ __marimo__/
 data/input/*
 data/output/*
 data/processed/*
+data/failed/*
+data/needs_review/*
 !data/input/.gitkeep
 !data/output/.gitkeep
 !data/processed/.gitkeep
+!data/failed/.gitkeep
+!data/needs_review/.gitkeep
