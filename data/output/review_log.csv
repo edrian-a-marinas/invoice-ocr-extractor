@@ -1,6 +1,0 @@
-File Name,Page,Needs Review,Confidence Score (%),Remarks
-doctor_receipts_1.pdf,1,Yes,25.3,"Field extraction failed: Receipt No., Doctor Name, PRC License, Hospital, Date, Patient Name, Total Amount"
-doctor_receipts_2.pdf,1,Yes,33.9,"Field extraction failed: Receipt No., Doctor Name, PRC License, Hospital, Date, Patient Name, Total Amount"
-doctor_receipts_3.pdf,1,Yes,17.5,"Field extraction failed: Receipt No., Doctor Name, PRC License, Hospital, Date, Patient Name, Total Amount"
-doctor_receipts_4.pdf,1,Yes,71.8,"Field extraction failed: Receipt No., Doctor Name, PRC License, Hospital, Date, Patient Name"
-doctor_receipts_5.pdf,1,Yes,66.7,"Field extraction failed: Receipt No., Doctor Name, PRC License, Hospital, Date, Patient Name"
