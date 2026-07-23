@@ -3,15 +3,16 @@
 Extracts structured data from scanned (image-based) medical receipt PDFs and exports it to Excel, with a review log flagging records that need human verification.
 
 ## Purpose
-Input:
- - a folder of scanned medical receipt PDFs (image-based, not real text — typically photographed rather than flatbed-scanned).
+Input: a folder of scanned medical receipt PDFs (image-based, not real text — typically photographed rather than flatbed-scanned).
 
 Output:
 - `Invoice_Extract.xlsx` — one row per page, with Page, Receipt No., Doctor Name, PRC License, Hospital, Date, Patient Name, Total Amount (PHP), and Signature.
 - `review_log.csv` — one row per page, flagging whether it needs human review and why.
 
-Processed:
-- successfully processed PDFs are moved from `data/input/` to `data/processed/` after each run — archived, not deleted, so re-running `main.py` won't reprocess the same files.
+Each processed PDF is moved out of `data/input/` into one of three folders based on outcome:
+- `data/processed/` — extracted cleanly, no review needed.
+- `data/needs_review/` — extracted, but flagged (inconsistent across passes, or failed a validation rule).
+- `data/failed/` — could not be processed at all (corrupted, unreadable, or not a valid PDF).
 
 ## How it works
 
@@ -68,10 +69,12 @@ flowchart LR
    ```
 5. **Add input PDFs**
    Place scanned receipt PDFs in `data/input/`. Any `.pdf` file placed there is picked up automatically.
+   
 6. **Run**
    ```
    python3 main.py
    ```
+   Output appears in `data/output/Invoice_Extract.xlsx` and `data/output/review_log.csv`. Each PDF is moved out of `data/input/` after processing: cleanly-extracted files go to `data/processed/`, flagged files go to `data/needs_review/`, and corrupted/unreadable/non-PDF files go to `data/failed/`. Nothing is deleted, and name collisions get a timestamp suffix instead of overwriting.
 
 ## Known limitations
 
