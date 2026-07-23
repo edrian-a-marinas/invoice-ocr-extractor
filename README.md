@@ -3,11 +3,15 @@
 Extracts structured data from scanned (image-based) medical receipt PDFs and exports it to Excel, with a review log flagging records that need human verification.
 
 ## Purpose
+Input:
+ - a folder of scanned medical receipt PDFs (image-based, not real text — typically photographed rather than flatbed-scanned).
 
-Input: a folder of scanned medical receipt PDFs (image-based, not real text — typically photographed rather than flatbed-scanned).
 Output:
 - `Invoice_Extract.xlsx` — one row per page, with Page, Receipt No., Doctor Name, PRC License, Hospital, Date, Patient Name, Total Amount (PHP), and Signature.
 - `review_log.csv` — one row per page, flagging whether it needs human review and why.
+
+Processed:
+- successfully processed PDFs are moved from `data/input/` to `data/processed/` after each run — archived, not deleted, so re-running `main.py` won't reprocess the same files.
 
 ## How it works
 
@@ -27,44 +31,47 @@ flowchart LR
     I --> K[Excel row + review log entry]
     F --> K
     J --> K
+    K --> L[Move PDF to data/processed/]
+    A -->|Corrupt/unreadable/API error| M[Log actual error message, skip, leave in data/input/]
     style E fill:#ffd54f
     style H fill:#ffd54f
     style F fill:#ef9a9a
     style I fill:#ef9a9a
     style J fill:#a5d6a7
     style K fill:#a5d6a7
+    style L fill:#a5d6a7
+    style M fill:#ef9a9a
 ```
 
 ## Setup
 
-1. **Clone and create a virtual environment**
+1. **Clone the repository**
+   ```
+   git clone https://github.com/edrian-a-marinas/invoice-ocr-extractor.git
+   cd invoice-ocr-extractor
+   ```
+2. **Copy the environment template and fill in your values**
+   ```
+   cp .env.example .env
+   ```
+   ```
+   GEMINI_API_KEY=your_actual_key_here
+   ```
+3. **Create a virtual environment**
    ```
    python3 -m venv venv
    source venv/bin/activate
    ```
-
-2. **Install dependencies**
+4. **Install dependencies**
    ```
    pip install -r requirements.txt
    ```
-
-3. **Get a Gemini API key** (free tier, no billing required) from [Google AI Studio](https://aistudio.google.com/), then create your `.env` file:
-   ```
-   cp .env.example .env
-   ```
-   Edit `.env` and paste your key:
-   ```
-   GEMINI_API_KEY=your_actual_key_here
-   ```
-
-4. **Add input PDFs**
-   Place scanned receipt PDFs in `data/input/`. Any `.pdf` file placed there is picked up automatically — filenames are not hardcoded.
-
-5. **Run**
+5. **Add input PDFs**
+   Place scanned receipt PDFs in `data/input/`. Any `.pdf` file placed there is picked up automatically.
+6. **Run**
    ```
    python3 main.py
    ```
-   Output appears in `data/output/Invoice_Extract.xlsx` and `data/output/review_log.csv`.
 
 ## Known limitations
 
