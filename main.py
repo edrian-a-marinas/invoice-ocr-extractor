@@ -32,6 +32,8 @@ def main():
     if not pdf_files:
         logger.info(f"[SYSTEM] No PDF files found in {INPUT_DIR}. Nothing to process.")
 
+    failed_files = 0
+
     for pdf_file in pdf_files:
         try:
             records, log_entries = process_pdf(str(pdf_file))
@@ -39,12 +41,15 @@ def main():
             logger.error(
                 f"[SYSTEM] Failed to process {pdf_file.name}: {e}. Skipping, left in input folder."
             )
+            failed_files += 1
             continue
 
         all_records.extend(records)
         all_log_entries.extend(log_entries)
         flagged = sum(1 for entry in log_entries if entry.needs_review)
-        logger.info(f"[SYSTEM] Processed {pdf_file.name}: {len(records)} page(s) | {flagged} flagged for review")
+        logger.info(
+            f"[SYSTEM] Processed {pdf_file.name}: {len(records)} page(s) | {flagged} flagged for review"
+        )
         _move_to_processed(pdf_file)
 
     write_records_to_excel(all_records, str(EXCEL_OUTPUT_PATH))
@@ -53,7 +58,8 @@ def main():
     total_flagged = sum(1 for entry in all_log_entries if entry.needs_review)
     logger.info(
         f"[SYSTEM] Run complete: {len(all_log_entries)} page(s) processed | "
-        f"{total_flagged} flagged for review | output written to {EXCEL_OUTPUT_PATH} and {REVIEW_LOG_PATH}"
+        f"{total_flagged} flagged for review | {failed_files} file(s) failed | "
+        f"output written to {EXCEL_OUTPUT_PATH} and {REVIEW_LOG_PATH}"
     )
 
 
