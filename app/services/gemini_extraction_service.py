@@ -56,5 +56,10 @@ def extract_receipt_fields(image: Image.Image) -> ExtractedReceiptFields:
         )
         return ExtractedReceiptFields.model_validate_json(interaction.output_text)
     except Exception as e:
-        logger.error(f"[GEMINI] Extraction API call failed: {e}")
+        if "429" in str(e) or "RESOURCE_EXHAUSTED" in str(e):
+            logger.error(
+                f"[GEMINI] Rate limit or quota exceeded — file needs manual retry later, not necessarily corrupt: {e}"
+            )
+        else:
+            logger.error(f"[GEMINI] Extraction API call failed: {e}")
         raise
