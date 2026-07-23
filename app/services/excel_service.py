@@ -1,3 +1,4 @@
+import os
 import openpyxl
 from app.core.schemas import ReceiptRecord
 
@@ -12,23 +13,28 @@ HEADERS = [
     "Total Amount (PHP)",
     "Signature",
 ]
-
-
 CENTERED_COLUMNS = {1, 2, 6, 8, 9}  # Page, Receipt No., Date, Total Amount, Signature
 
 
 def write_records_to_excel(records: list[ReceiptRecord], output_path: str) -> None:
-    wb = openpyxl.Workbook()
-    ws = wb.active
     center = openpyxl.styles.Alignment(horizontal="center")
 
-    for col, header in enumerate(HEADERS, start=1):
-        cell = ws.cell(row=1, column=col, value=header)
-        cell.font = openpyxl.styles.Font(bold=True)
-        if col in CENTERED_COLUMNS:
-            cell.alignment = center
+    if os.path.exists(output_path):
+        wb = openpyxl.load_workbook(output_path)
+        ws = wb.active
+        next_row = ws.max_row + 1
+    else:
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        for col, header in enumerate(HEADERS, start=1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.font = openpyxl.styles.Font(bold=True)
+            if col in CENTERED_COLUMNS:
+                cell.alignment = center
+        next_row = 2
 
-    for row_idx, record in enumerate(records, start=2):
+    for offset, record in enumerate(records):
+        row_idx = next_row + offset
         values = [
             record.page,
             record.receipt_no,
@@ -50,7 +56,7 @@ def write_records_to_excel(records: list[ReceiptRecord], output_path: str) -> No
     for col_idx, header in enumerate(HEADERS, start=1):
         column_letter = openpyxl.utils.get_column_letter(col_idx)
         max_length = len(header)
-        for row_idx in range(2, len(records) + 2):
+        for row_idx in range(2, ws.max_row + 1):
             value = ws.cell(row=row_idx, column=col_idx).value
             if value is not None:
                 max_length = max(max_length, len(str(value)))
