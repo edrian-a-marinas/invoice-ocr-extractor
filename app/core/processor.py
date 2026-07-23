@@ -26,7 +26,7 @@ def _validate_fields(extracted) -> list[str]:
     """
     issues = []
 
-    if not re.fullmatch(r"[A-Z]{0,4}-?\d{3,}", extracted.receipt_no):
+    if not re.fullmatch(r"[A-Z]{1,4}-?\d{3,}", extracted.receipt_no):
         issues.append("receipt_no format invalid")
 
     prc_match = re.fullmatch(r"PRC Lic\. No\. (\d{4,6})", extracted.prc_license)
