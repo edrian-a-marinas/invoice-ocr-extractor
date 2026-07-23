@@ -1,8 +1,11 @@
+import logging
 from google import genai
 from app.core.schemas import ExtractedReceiptFields
 from PIL import Image
 import io
 from app.config import GEMINI_API_KEY
+
+logger = logging.getLogger(__name__)
 
 MODEL_NAME = "gemini-3.1-flash-lite"
 
@@ -31,25 +34,27 @@ def extract_receipt_fields(image: Image.Image) -> ExtractedReceiptFields:
     image.save(buffer, format="PNG")
     image_bytes = buffer.getvalue()
 
-    uploaded_file = client.files.upload(
-        file=io.BytesIO(image_bytes), config={"mime_type": "image/png"}
-    )
-
-    interaction = client.interactions.create(
-        model=MODEL_NAME,
-        input=[
-            {"type": "text", "text": EXTRACTION_PROMPT},
-            {
-                "type": "image",
-                "uri": uploaded_file.uri,
-                "mime_type": uploaded_file.mime_type,
+    try:
+        uploaded_file = client.files.upload(
+            file=io.BytesIO(image_bytes), config={"mime_type": "image/png"}
+        )
+        interaction = client.interactions.create(
+            model=MODEL_NAME,
+            input=[
+                {"type": "text", "text": EXTRACTION_PROMPT},
+                {
+                    "type": "image",
+                    "uri": uploaded_file.uri,
+                    "mime_type": uploaded_file.mime_type,
+                },
+            ],
+            response_format={
+                "type": "text",
+                "mime_type": "application/json",
+                "schema": ExtractedReceiptFields.model_json_schema(),
             },
-        ],
-        response_format={
-            "type": "text",
-            "mime_type": "application/json",
-            "schema": ExtractedReceiptFields.model_json_schema(),
-        },
-    )
-
-    return ExtractedReceiptFields.model_validate_json(interaction.output_text)
+        )
+        return ExtractedReceiptFields.model_validate_json(interaction.output_text)
+    except Exception as e:
+        logger.error(f"[GEMINI] Extraction API call failed: {e}")
+        raise
